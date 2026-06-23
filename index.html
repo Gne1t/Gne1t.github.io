@@ -7,6 +7,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <style>
+        /* ============================================================
+           CSS 变量 & 全局
+           ============================================================ */
         :root {
             --bg-deep: #0f0c29; --bg-mid: #302b63; --bg-slate: #24243e;
             --cyan: #00f5d4; --magenta: #ff6fd8;
@@ -25,7 +28,38 @@
             background-attachment:fixed;color:var(--t2);line-height:1.7;overflow-x:hidden;min-height:100vh;
         }
 
-        /* 鼠标光晕 */
+        /* ============================================================
+           滚动进度条
+           ============================================================ */
+        .scroll-progress{
+            position:fixed;top:0;left:0;height:3px;
+            background:linear-gradient(90deg,var(--cyan),var(--magenta));
+            z-index:10000;border-radius:0 2px 2px 0;
+            box-shadow:0 0 12px var(--cyan-glow),0 0 6px var(--magenta-glow);
+            transition:width .1s linear;
+        }
+
+        /* ============================================================
+           背景漂浮粒子容器
+           ============================================================ */
+        .bg-particles{
+            position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;
+        }
+        .bg-dot{
+            position:absolute;border-radius:50%;
+            animation:floatUp linear infinite;
+            opacity:0;
+        }
+        @keyframes floatUp{
+            0%{transform:translateY(105vh) scale(0);opacity:0}
+            10%{opacity:0.7}
+            90%{opacity:0.3}
+            100%{transform:translateY(-10vh) scale(1);opacity:0}
+        }
+
+        /* ============================================================
+           鼠标光晕（淡雅单环）
+           ============================================================ */
         .mouse-glow{
             position:fixed;top:0;left:0;width:600px;height:600px;border-radius:50%;
             pointer-events:none;z-index:0;
@@ -34,142 +68,367 @@
         }
         .mouse-glow.visible{opacity:1}
 
-        /* 导航 */
+        /* ============================================================
+           导航栏 — 玻璃拟态升级
+           ============================================================ */
         .navbar{
             position:fixed;top:0;left:0;right:0;z-index:1000;
-            background:var(--glass-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-            border-bottom:1px solid var(--glass-border);transition:all .35s;
+            background:var(--glass-bg);backdrop-filter:blur(24px) saturate(180%);
+            -webkit-backdrop-filter:blur(24px) saturate(180%);
+            border-bottom:1px solid var(--glass-border);transition:all .4s;
         }
-        .navbar.scrolled{background:rgba(15,12,41,.9);box-shadow:0 4px 30px rgba(0,0,0,.4)}
+        .navbar.scrolled{
+            background:rgba(15,12,41,.92);
+            box-shadow:0 4px 40px rgba(0,0,0,.5),0 1px 0 rgba(0,245,212,.08);
+        }
         .nav-container{max-width:1200px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:70px}
         .nav-logo{
             font-size:1.4rem;font-weight:800;text-decoration:none;
-            background:linear-gradient(135deg,var(--cyan),var(--magenta));-webkit-background-clip:text;
-            background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap;
+            background:linear-gradient(135deg,var(--cyan),var(--magenta));
+            -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+            white-space:nowrap;position:relative;
         }
+        .nav-logo::after{
+            content:'';position:absolute;bottom:-2px;left:0;width:0;height:2px;
+            background:linear-gradient(90deg,var(--cyan),var(--magenta));
+            transition:width .4s;border-radius:1px;
+        }
+        .nav-logo:hover::after{width:100%}
         .nav-menu{display:flex;list-style:none;gap:6px}
         .nav-link{
             padding:8px 16px;color:var(--t3);text-decoration:none;font-size:.9rem;font-weight:500;
             border-radius:8px;transition:all .3s;position:relative;
         }
-        .nav-link:hover,.nav-link.active{color:var(--t1);background:rgba(255,255,255,.06)}
-        .nav-link.active::after{content:'';position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:18px;height:2px;background:var(--cyan);border-radius:1px}
+        .nav-link:hover{color:var(--t1);background:rgba(255,255,255,.04)}
+        .nav-link.active{color:var(--t1);background:rgba(0,245,212,.08)}
+        .nav-link.active::after{
+            content:'';position:absolute;bottom:2px;left:50%;transform:translateX(-50%);
+            width:18px;height:2px;background:var(--cyan);border-radius:1px;
+            box-shadow:0 0 10px var(--cyan);
+        }
         .nav-toggle{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:4px;z-index:1001}
         .nav-toggle span{display:block;width:24px;height:2px;background:var(--t1);border-radius:1px;transition:all .3s}
         .nav-toggle.active span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
         .nav-toggle.active span:nth-child(2){opacity:0}
         .nav-toggle.active span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
 
-        /* Hero */
+        /* ============================================================
+           Hero 区域
+           ============================================================ */
         .hero{
             position:relative;min-height:100vh;display:flex;align-items:center;
             padding:100px 24px 60px;max-width:1200px;margin:0 auto;gap:40px;z-index:1;
         }
         .hero-left{flex:1;z-index:2}
-        .hero-left .greeting{font-size:1rem;color:var(--cyan);font-family:'JetBrains Mono',monospace;margin-bottom:14px;letter-spacing:3px;text-transform:uppercase}
-        .hero-left h1{font-size:clamp(2rem,5vw,3.6rem);font-weight:900;color:var(--t1);line-height:1.2;margin-bottom:8px}
-        .hero-left h1 .hl{background:linear-gradient(135deg,var(--cyan),var(--magenta));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+        .hero-left .greeting{
+            font-size:1rem;color:var(--cyan);font-family:'JetBrains Mono',monospace;
+            margin-bottom:14px;letter-spacing:3px;text-transform:uppercase;
+            animation:pulse-text 2s ease-in-out infinite;
+            display:flex;align-items:center;gap:10px;
+        }
+        /* 在线状态指示点 */
+        .status-dot{
+            display:inline-block;width:8px;height:8px;border-radius:50%;
+            background:var(--cyan);box-shadow:0 0 8px var(--cyan);
+            animation:status-pulse 2s ease-in-out infinite;
+        }
+        @keyframes status-pulse{0%,100%{box-shadow:0 0 6px var(--cyan)}50%{box-shadow:0 0 16px var(--cyan),0 0 24px rgba(0,245,212,.4)}}
+        .status-text{font-size:.7rem;color:var(--t3);letter-spacing:1px}
+        @keyframes pulse-text{0%,100%{opacity:1}50%{opacity:.6}}
+        .hero-left h1{
+            font-size:clamp(2rem,5vw,3.6rem);font-weight:900;color:var(--t1);
+            line-height:1.2;margin-bottom:8px;
+            text-shadow:0 0 80px rgba(0,245,212,.15);
+        }
+        .hero-left h1 .hl{
+            background:linear-gradient(135deg,var(--cyan) 0%,var(--magenta) 50%,var(--cyan) 100%);
+            background-size:200% auto;
+            -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+            animation:shimmer 4s linear infinite;
+        }
+        @keyframes shimmer{0%{background-position:0 center}100%{background-position:200% center}}
         .hero-left .subtitle{font-size:1.1rem;color:var(--t3);margin-top:18px;max-width:500px;line-height:1.8}
         .hero-cta{display:flex;gap:14px;margin-top:34px;flex-wrap:wrap}
-        .btn{display:inline-flex;align-items:center;gap:8px;padding:13px 30px;border-radius:50px;font-size:.95rem;font-weight:600;text-decoration:none;cursor:pointer;border:none;transition:all .35s cubic-bezier(.4,0,.2,1)}
-        .btn-primary{background:linear-gradient(135deg,var(--cyan),var(--magenta));color:var(--bg-deep);box-shadow:0 4px 25px var(--cyan-glow)}
-        .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 40px rgba(0,245,212,.45)}
-        .btn-outline{background:transparent;color:var(--t1);border:1.5px solid rgba(255,255,255,.22)}
-        .btn-outline:hover{border-color:var(--cyan);background:rgba(0,245,212,.08);box-shadow:0 0 30px rgba(0,245,212,.15)}
+        .btn{
+            display:inline-flex;align-items:center;gap:8px;padding:14px 32px;border-radius:50px;
+            font-size:.95rem;font-weight:600;text-decoration:none;cursor:pointer;border:none;
+            transition:all .4s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden;
+        }
+        .btn::before{
+            content:'';position:absolute;inset:0;border-radius:50px;
+            opacity:0;transition:opacity .4s;
+        }
+        .btn-primary{
+            background:linear-gradient(135deg,var(--cyan),var(--magenta));
+            color:var(--bg-deep);box-shadow:0 4px 30px var(--cyan-glow);
+        }
+        .btn-primary::before{
+            background:linear-gradient(135deg,var(--magenta),var(--cyan));
+        }
+        .btn-primary:hover{transform:translateY(-3px);box-shadow:0 12px 50px rgba(0,245,212,.5)}
+        .btn-primary:hover::before{opacity:1}
+        .btn-primary span{position:relative;z-index:1}
+        .btn-outline{
+            background:transparent;color:var(--t1);
+            border:1.5px solid rgba(255,255,255,.22);
+        }
+        .btn-outline:hover{
+            border-color:var(--cyan);background:rgba(0,245,212,.08);
+            box-shadow:0 0 40px rgba(0,245,212,.2),inset 0 0 30px rgba(0,245,212,.05);
+            transform:translateY(-3px);
+        }
         .hero-right{flex:1;display:flex;align-items:center;justify-content:center;z-index:2;min-height:400px}
-        #particleCanvas{width:100%;max-width:500px;height:500px;filter:drop-shadow(0 0 30px rgba(0,245,212,.2))}
+        #particleCanvas{width:100%;max-width:500px;height:500px;filter:drop-shadow(0 0 50px rgba(0,245,212,.25))}
 
-        /* 通用 Section */
-        .section{padding:100px 0;position:relative;z-index:1}
+        /* ============================================================
+           通用 Section
+           ============================================================ */
+        .section{padding:110px 0;position:relative;z-index:1}
         .section-container{max-width:1200px;margin:0 auto;padding:0 24px}
         .section-header{text-align:center;margin-bottom:60px}
-        .section-tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--cyan);letter-spacing:3px;text-transform:uppercase;margin-bottom:12px;padding:4px 16px;border:1px solid rgba(0,245,212,.25);border-radius:20px}
+        .section-tag{
+            display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.82rem;
+            color:var(--cyan);letter-spacing:3px;text-transform:uppercase;margin-bottom:12px;
+            padding:5px 18px;border:1px solid rgba(0,245,212,.25);border-radius:20px;
+            backdrop-filter:blur(4px);
+        }
         .section-title{font-size:clamp(1.7rem,3.5vw,2.5rem);font-weight:800;color:var(--t1);margin-bottom:10px}
-        .section-title .ac{background:linear-gradient(135deg,var(--cyan),var(--magenta));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+        .section-title .ac{
+            background:linear-gradient(135deg,var(--cyan),var(--magenta));
+            -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+        }
         .section-desc{color:var(--t3);font-size:1.02rem;max-width:600px;margin:0 auto}
 
-        /* 滚动动画 */
+        /* ============================================================
+           SVG 段间分割线
+           ============================================================ */
+        .section-divider{
+            position:relative;height:60px;overflow:hidden;z-index:1;
+            margin-top:-30px;margin-bottom:-30px;
+        }
+        .section-divider svg{position:absolute;bottom:0;width:100%;height:60px}
+        .section-divider.flip svg{transform:rotate(180deg)}
+
+        /* ============================================================
+           滚动入场动画
+           ============================================================ */
         .reveal{opacity:0;transform:translateY(50px);transition:opacity .8s cubic-bezier(.4,0,.2,1),transform .8s cubic-bezier(.4,0,.2,1)}
         .reveal.visible{opacity:1;transform:translateY(0)}
         .rd1{transition-delay:.1s}.rd2{transition-delay:.2s}.rd3{transition-delay:.3s}.rd4{transition-delay:.4s}
 
-        /* 关于卡片 */
+        /* ============================================================
+           关于我 — 3D卡片
+           ============================================================ */
         .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:50px;align-items:center}
         .about-card{
             background:var(--card-bg);border:1px solid var(--card-border);border-radius:24px;
-            padding:44px 36px;position:relative;overflow:hidden;
-            transform-style:preserve-3d;perspective:1000px;
+            padding:44px 36px;position:relative;overflow:visible;
         }
-        .about-card::before{content:'';position:absolute;inset:0;border-radius:24px;background:linear-gradient(135deg,rgba(0,245,212,.06),transparent 50%,rgba(255,111,216,.06));z-index:-1}
-        .about-card .avatar-area{display:flex;align-items:center;gap:18px;margin-bottom:22px}
-        .about-card .avatar-icon{width:68px;height:68px;border-radius:18px;background:linear-gradient(135deg,var(--cyan),var(--magenta));display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:var(--bg-deep);box-shadow:0 8px 30px var(--cyan-glow);flex-shrink:0}
-        .about-card .name-title h3{font-size:1.4rem;font-weight:700;color:var(--t1)}
-        .about-card .name-title span{font-size:.85rem;color:var(--cyan);font-family:'JetBrains Mono',monospace}
-        .about-card .bio{color:var(--t2);line-height:1.9;font-size:.98rem}
-        .about-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:26px}
-        .stat-item{background:rgba(255,255,255,.03);border-radius:14px;padding:16px;text-align:center;border:1px solid rgba(255,255,255,.05)}
-        .stat-item .stat-num{font-size:1.7rem;font-weight:800;background:linear-gradient(135deg,var(--cyan),var(--magenta));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+        .about-card::before{
+            content:'';position:absolute;inset:0;border-radius:24px;
+            background:linear-gradient(135deg,rgba(0,245,212,.06),transparent 50%,rgba(255,111,216,.06));
+            z-index:0;
+        }
+        .about-card .avatar-area{display:flex;align-items:center;gap:18px;margin-bottom:22px;position:relative;z-index:1}
+        .about-card .avatar-icon{
+            width:68px;height:68px;border-radius:18px;
+            background:linear-gradient(135deg,var(--cyan),var(--magenta));
+            display:flex;align-items:center;justify-content:center;
+            font-size:1.8rem;color:var(--bg-deep);
+            box-shadow:0 8px 35px var(--cyan-glow);flex-shrink:0;
+            animation:icon-float 3s ease-in-out infinite;
+        }
+        @keyframes icon-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+        .about-card .name-title h3{font-size:1.4rem;font-weight:700;color:var(--t1);position:relative;z-index:1}
+        .about-card .name-title span{font-size:.85rem;color:var(--cyan);font-family:'JetBrains Mono',monospace;position:relative;z-index:1}
+        .about-card .bio{color:var(--t2);line-height:1.9;font-size:.98rem;position:relative;z-index:1}
+        /* 悬停跟随提示 */
+        .tilt-tooltip{
+            position:absolute;left:0;top:0;z-index:10;pointer-events:none;
+            background:rgba(0,245,212,.9);color:var(--bg-deep);padding:4px 10px;
+            border-radius:4px;font-size:11px;font-weight:600;
+            white-space:nowrap;opacity:0;transform:translate(-50%,-130%);
+            transition:opacity .25s;
+            box-shadow:0 4px 15px rgba(0,245,212,.3);
+        }
+        .tilt-tooltip.visible{opacity:1}
+        .about-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:26px;position:relative;z-index:1}
+        .stat-item{
+            background:rgba(255,255,255,.03);border-radius:14px;padding:18px 14px;
+            text-align:center;border:1px solid rgba(255,255,255,.05);
+            transition:all .3s;
+        }
+        .stat-item:hover{
+            background:rgba(255,255,255,.06);border-color:rgba(0,245,212,.15);
+            transform:translateY(-2px);box-shadow:0 8px 25px rgba(0,245,212,.08);
+        }
+        .stat-item .stat-num{
+            font-size:1.7rem;font-weight:800;
+            background:linear-gradient(135deg,var(--cyan),var(--magenta));
+            -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+        }
         .stat-item .stat-label{font-size:.8rem;color:var(--t3);margin-top:2px}
         .about-visual{display:flex;flex-direction:column;gap:16px}
-        .flow-line{display:flex;align-items:center;gap:14px;padding:16px 22px;background:rgba(255,255,255,.03);border-radius:14px;border-left:3px solid transparent;transition:all .4s}
-        .flow-line:nth-child(1){border-left-color:var(--cyan)}.flow-line:nth-child(2){border-left-color:var(--magenta)}
-        .flow-line:nth-child(3){border-left-color:var(--cyan)}.flow-line:nth-child(4){border-left-color:var(--magenta)}
-        .flow-line:hover{background:rgba(255,255,255,.06);transform:translateX(6px)}
+        .flow-line{
+            display:flex;align-items:center;gap:14px;padding:16px 22px;
+            background:rgba(255,255,255,.03);border-radius:14px;
+            border-left:3px solid transparent;transition:all .4s;
+            backdrop-filter:blur(4px);
+        }
+        .flow-line:nth-child(1){border-left-color:var(--cyan)}
+        .flow-line:nth-child(2){border-left-color:var(--magenta)}
+        .flow-line:nth-child(3){border-left-color:var(--cyan)}
+        .flow-line:nth-child(4){border-left-color:var(--magenta)}
+        .flow-line:hover{background:rgba(255,255,255,.06);transform:translateX(8px);box-shadow:0 8px 30px rgba(0,0,0,.2)}
         .flow-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
         .flow-line:nth-child(odd) .flow-icon{background:rgba(0,245,212,.12);color:var(--cyan)}
         .flow-line:nth-child(even) .flow-icon{background:rgba(255,111,216,.12);color:var(--magenta)}
         .flow-text h4{font-size:.95rem;font-weight:600;color:var(--t1)}
         .flow-text p{font-size:.82rem;color:var(--t3);margin-top:2px}
 
-        /* 技能雷达图 */
+        /* ============================================================
+           技能雷达图
+           ============================================================ */
         .skills-wrapper{display:flex;align-items:center;justify-content:center;gap:50px}
-        #radarCanvas{display:block}
+        #radarCanvas{display:block;filter:drop-shadow(0 0 20px rgba(0,245,212,.15))}
         .skills-legend{display:flex;flex-direction:column;gap:12px}
-        .legend-item{display:flex;align-items:center;gap:10px;font-size:.9rem;color:var(--t2);transition:all .3s;cursor:default}
-        .legend-item:hover{color:var(--t1);transform:translateX(4px)}
-        .legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-        .legend-item:nth-child(odd) .legend-dot{background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
-        .legend-item:nth-child(even) .legend-dot{background:var(--magenta);box-shadow:0 0 10px var(--magenta)}
+        .legend-item{
+            display:flex;align-items:center;gap:10px;font-size:.9rem;
+            color:var(--t2);transition:all .3s;cursor:default;padding:6px 10px;
+            border-radius:8px;
+        }
+        .legend-item:hover{color:var(--t1);transform:translateX(6px);background:rgba(255,255,255,.03)}
+        .legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;animation:dot-pulse 2s ease-in-out infinite}
+        .legend-item:nth-child(odd) .legend-dot{background:var(--cyan);box-shadow:0 0 12px var(--cyan);animation-delay:0s}
+        .legend-item:nth-child(even) .legend-dot{background:var(--magenta);box-shadow:0 0 12px var(--magenta);animation-delay:.5s}
+        @keyframes dot-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.6)}}
         .legend-value{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--t3)}
 
-        /* 项目卡片 */
+        /* ============================================================
+           项目卡片
+           ============================================================ */
         .projects-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:26px;max-width:900px;margin:0 auto}
         .project-card{
             background:var(--card-bg);border:1px solid var(--card-border);border-radius:20px;
             overflow:hidden;transition:all .5s cubic-bezier(.4,0,.2,1);position:relative;cursor:pointer;
         }
-        .project-card:hover{transform:translateY(-12px);border-color:rgba(0,245,212,.3);box-shadow:0 20px 60px rgba(0,245,212,.1),0 0 80px rgba(255,111,216,.06)}
-        .project-card::after{content:'';position:absolute;top:-100%;left:-100%;width:300%;height:300%;background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.08) 45%,rgba(0,245,212,.12) 50%,rgba(255,111,216,.08) 55%,transparent 60%);transition:all .6s;pointer-events:none;z-index:1}
+        .project-card:hover{
+            transform:translateY(-10px);border-color:rgba(0,245,212,.2);
+            box-shadow:0 20px 60px rgba(0,245,212,.08),0 0 60px rgba(255,111,216,.04);
+        }
+        .project-card::after{
+            content:'';position:absolute;top:-100%;left:-100%;width:300%;height:300%;
+            background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.06) 45%,rgba(0,245,212,.1) 50%,rgba(255,111,216,.06) 55%,transparent 60%);
+            transition:all .7s;pointer-events:none;z-index:1;
+        }
         .project-card:hover::after{top:-20%;left:100%}
-        .project-img{height:190px;display:flex;align-items:center;justify-content:center;font-size:3.2rem;color:rgba(255,255,255,.18);position:relative;overflow:hidden}
-        .project-img .img-pattern{position:absolute;inset:0;opacity:.12;background-image:linear-gradient(rgba(0,245,212,.3) 1px,transparent 1px),linear-gradient(90deg,rgba(0,245,212,.3) 1px,transparent 1px);background-size:28px 28px}
+        .project-img{
+            height:200px;display:flex;align-items:center;justify-content:center;
+            font-size:3.5rem;color:rgba(255,255,255,.15);position:relative;overflow:hidden;
+        }
+        .project-img .img-pattern{
+            position:absolute;inset:0;opacity:.12;
+            background-image:linear-gradient(rgba(0,245,212,.3) 1px,transparent 1px),linear-gradient(90deg,rgba(0,245,212,.3) 1px,transparent 1px);
+            background-size:28px 28px;
+            animation:pattern-drift 20s linear infinite;
+        }
+        @keyframes pattern-drift{0%{background-position:0 0}100%{background-position:28px 28px}}
         .project-img.i1{background:linear-gradient(135deg,rgba(0,245,212,.12),rgba(15,12,41,.5))}
         .project-img.i2{background:linear-gradient(135deg,rgba(255,111,216,.12),rgba(15,12,41,.5))}
-        .project-img.i3{background:linear-gradient(135deg,rgba(0,245,212,.08),rgba(255,111,216,.08))}
-        .project-body{padding:22px;position:relative;z-index:2}
-        .project-body h3{font-size:1.15rem;font-weight:700;color:var(--t1);margin-bottom:6px}
-        .project-body p{font-size:.88rem;color:var(--t3);line-height:1.6;margin-bottom:14px}
+        /* 浮动光圈 */
+        .project-img .floating-orb{
+            position:absolute;width:100px;height:100px;border-radius:50%;
+            background:radial-gradient(circle,rgba(0,245,212,.15),transparent 70%);
+            animation:orb-drift 6s ease-in-out infinite;
+            pointer-events:none;
+        }
+        .project-img.i1 .floating-orb{top:20%;left:30%;animation-delay:0s}
+        .project-img.i2 .floating-orb{top:30%;left:50%;animation-delay:-3s;background:radial-gradient(circle,rgba(255,111,216,.15),transparent 70%)}
+        @keyframes orb-drift{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(30px,-20px) scale(1.2)}66%{transform:translate(-20px,15px) scale(.9)}}
+        .project-body{padding:24px;position:relative;z-index:2}
+        .project-body h3{font-size:1.15rem;font-weight:700;color:var(--t1);margin-bottom:8px}
+        .project-body p{font-size:.88rem;color:var(--t3);line-height:1.6;margin-bottom:16px}
         .project-tags{display:flex;flex-wrap:wrap;gap:7px}
-        .tag{display:inline-block;padding:3px 11px;border-radius:18px;font-size:.75rem;font-weight:500;font-family:'JetBrains Mono',monospace;background:rgba(0,245,212,.08);color:var(--cyan);border:1px solid rgba(0,245,212,.15);transition:all .3s}
-        .tag.mg{background:rgba(255,111,216,.08);color:var(--magenta);border-color:rgba(255,111,216,.15)}
-        .project-card:hover .tag{border-color:rgba(0,245,212,.35)}.project-card:hover .tag.mg{border-color:rgba(255,111,216,.35)}
+        .tag{
+            display:inline-block;padding:4px 12px;border-radius:18px;font-size:.75rem;font-weight:500;
+            font-family:'JetBrains Mono',monospace;transition:all .3s;
+        }
 
-        /* 联系 */
+        /* ============================================================
+           联系区
+           ============================================================ */
         .contact-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;max-width:800px;margin:0 auto}
-        .contact-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:18px;padding:30px 22px;text-align:center;text-decoration:none;color:var(--t2);transition:all .4s;position:relative;overflow:hidden}
-        .contact-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,245,212,.05),rgba(255,111,216,.05));opacity:0;transition:opacity .4s}
-        .contact-card:hover{transform:translateY(-6px);border-color:rgba(0,245,212,.25);box-shadow:0 16px 48px rgba(0,245,212,.1)}
+        .contact-card{
+            background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);
+            border-radius:18px;padding:32px 22px;text-align:center;text-decoration:none;
+            color:var(--t2);transition:all .45s;position:relative;overflow:hidden;
+            backdrop-filter:blur(4px);
+        }
+        .contact-card::before{
+            content:'';position:absolute;inset:0;
+            background:linear-gradient(135deg,rgba(0,245,212,.06),rgba(255,111,216,.06));
+            opacity:0;transition:opacity .45s;
+        }
+        .contact-card:hover{
+            transform:translateY(-8px);
+            border-color:rgba(0,245,212,.3);
+            box-shadow:0 20px 60px rgba(0,245,212,.12),0 0 40px rgba(255,111,216,.05);
+        }
         .contact-card:hover::before{opacity:1}
-        .contact-card .ci{font-size:2rem;margin-bottom:12px;background:linear-gradient(135deg,var(--cyan),var(--magenta));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;position:relative;z-index:1}
-        .contact-card h4{font-size:1rem;font-weight:600;color:var(--t1);margin-bottom:3px;position:relative;z-index:1}
+        .contact-card .ci{
+            font-size:2.2rem;margin-bottom:14px;
+            background:linear-gradient(135deg,var(--cyan),var(--magenta));
+            -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+            position:relative;z-index:1;
+        }
+        .contact-card h4{font-size:1rem;font-weight:600;color:var(--t1);margin-bottom:4px;position:relative;z-index:1}
         .contact-card span{font-size:.82rem;color:var(--t3);position:relative;z-index:1}
 
-        /* Footer */
-        .footer{text-align:center;padding:40px 24px;border-top:1px solid rgba(255,255,255,.05);color:var(--t3);font-size:.82rem;z-index:1;position:relative}
-        .footer .heart{color:var(--magenta);animation:hb 1.5s ease infinite}
-        @keyframes hb{0%,100%{transform:scale(1)}15%{transform:scale(1.25)}30%{transform:scale(1)}45%{transform:scale(1.15)}60%{transform:scale(1)}}
+        /* ============================================================
+           Footer
+           ============================================================ */
+        .footer{
+            text-align:center;padding:40px 24px;
+            border-top:1px solid rgba(255,255,255,.05);
+            color:var(--t3);font-size:.82rem;z-index:1;position:relative;
+        }
+        .footer .heart{color:var(--magenta);animation:hb 1.5s ease infinite;display:inline-block}
+        @keyframes hb{0%,100%{transform:scale(1)}15%{transform:scale(1.3)}30%{transform:scale(1)}45%{transform:scale(1.2)}60%{transform:scale(1)}}
 
-        /* ===== 响应式 ===== */
+        /* ============================================================
+           段号水印
+           ============================================================ */
+        .section-number{
+            position:absolute;top:20px;left:50%;transform:translateX(-50%);
+            font-size:clamp(6rem,12vw,10rem);font-weight:900;
+            font-family:'Inter',sans-serif;line-height:1;
+            background:linear-gradient(180deg,rgba(255,255,255,.02),transparent);
+            -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+            pointer-events:none;z-index:0;user-select:none;
+        }
+
+        /* ============================================================
+           回到顶部按钮
+           ============================================================ */
+        .back-to-top{
+            position:fixed;bottom:30px;right:30px;z-index:999;
+            width:44px;height:44px;border-radius:50%;
+            background:rgba(15,12,41,.8);border:1px solid rgba(255,255,255,.1);
+            backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+            display:flex;align-items:center;justify-content:center;
+            cursor:pointer;transition:all .35s;
+            opacity:0;transform:translateY(20px);pointer-events:none;
+        }
+        .back-to-top.visible{opacity:1;transform:translateY(0);pointer-events:auto}
+        .back-to-top:hover{
+            border-color:var(--cyan);background:rgba(0,245,212,.1);
+            box-shadow:0 0 25px rgba(0,245,212,.2);transform:translateY(-3px);
+        }
+        .back-to-top svg{width:18px;height:18px;stroke:var(--cyan);stroke-width:2;fill:none}
+
+        /* ============================================================
+           响应式
+           ============================================================ */
         @media(max-width:1024px){
             .projects-grid{grid-template-columns:repeat(2,1fr);max-width:100%}
             .about-grid{grid-template-columns:1fr}
@@ -206,6 +465,12 @@
 </head>
 <body>
 
+<!-- 滚动进度条 -->
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<!-- 背景漂浮粒子 -->
+<div class="bg-particles" id="bgParticles"></div>
+
 <!-- 鼠标跟随光晕 -->
 <div class="mouse-glow" id="mouseGlow"></div>
 
@@ -229,14 +494,14 @@
 <!-- ==================== Hero 区域 ==================== -->
 <section class="hero" id="home">
     <div class="hero-left reveal">
-        <p class="greeting">&gt; Hello, World!</p>
+        <p class="greeting"><span class="status-dot"></span><span class="status-text">AVAILABLE</span>&nbsp;&nbsp;&gt; Hello, World!</p>
         <h1>我是<span class="hl">曹雨杭</span><br>一名未来的<span class="hl" id="typed-target"></span></h1>
         <p class="subtitle">
             信息管理与信息系统专业大三在读，热衷用数据驱动决策、用技术重塑管理。
             相信每一行代码、每一份报表背后，都藏着一个更高效的世界。
         </p>
         <div class="hero-cta">
-            <a href="#projects" class="btn btn-primary"><i class="fa-solid fa-rocket"></i> 查看作品</a>
+            <a href="#projects" class="btn btn-primary"><span><i class="fa-solid fa-rocket"></i> 查看作品</span></a>
             <a href="#contact" class="btn btn-outline"><i class="fa-solid fa-paper-plane"></i> 与我联系</a>
         </div>
     </div>
@@ -244,6 +509,11 @@
         <canvas id="particleCanvas" width="500" height="500"></canvas>
     </div>
 </section>
+
+<!-- 段间分割 -->
+<div class="section-divider">
+    <svg viewBox="0 0 1440 60" preserveAspectRatio="none"><path d="M0,30 C240,0 480,60 720,30 C960,0 1200,60 1440,30 L1440,60 L0,60 Z" fill="rgba(0,245,212,0.03)"/></svg>
+</div>
 
 <!-- ==================== 关于我 ==================== -->
 <section class="section" id="about">
@@ -256,6 +526,7 @@
         <div class="about-grid">
             <!-- 3D倾斜卡片 -->
             <div class="about-card reveal rd1" id="tiltCard">
+                <div class="tilt-tooltip" id="tiltTooltip">Gne1t</div>
                 <div class="avatar-area">
                     <div class="avatar-icon"><i class="fa-solid fa-user-graduate"></i></div>
                     <div class="name-title">
@@ -270,8 +541,8 @@
                     项目已获大创立项与软件著作权。目前专注于数据库系统与微信云开发方向。
                 </p>
                 <div class="about-stats">
-                    <div class="stat-item"><div class="stat-num">2</div><div class="stat-label">核心项目</div></div>
-                    <div class="stat-item"><div class="stat-num">1</div><div class="stat-label">软件著作权</div></div>
+                    <div class="stat-item"><div class="stat-num" data-target="2">0</div><div class="stat-label">核心项目</div></div>
+                    <div class="stat-item"><div class="stat-num" data-target="1">0</div><div class="stat-label">软件著作权</div></div>
                     <div class="stat-item"><div class="stat-num">互联网+</div><div class="stat-label">竞赛参与</div></div>
                     <div class="stat-item"><div class="stat-num">大创</div><div class="stat-label">项目立项</div></div>
                 </div>
@@ -299,23 +570,35 @@
     </div>
 </section>
 
+<!-- 段间分割 -->
+<div class="section-divider flip">
+    <svg viewBox="0 0 1440 60" preserveAspectRatio="none"><path d="M0,30 C240,0 480,60 720,30 C960,0 1200,60 1440,30 L1440,60 L0,60 Z" fill="rgba(255,111,216,0.03)"/></svg>
+</div>
+
 <!-- ==================== 技能图谱 ==================== -->
 <section class="section" id="skills">
+    <span class="section-number">02</span>
     <div class="section-container">
         <div class="section-header reveal">
             <span class="section-tag">Skills</span>
             <h2 class="section-title">技能<span class="ac">图谱</span></h2>
             <p class="section-desc">多维度能力雷达——每一条轴代表一项核心技能</p>
         </div>
-        <div class="skills-wrapper reveal rd1">
+        <div class="skills-wrapper reveal rd1" id="skillsWrapper">
             <canvas id="radarCanvas" width="440" height="440"></canvas>
             <div class="skills-legend" id="skillsLegend"></div>
         </div>
     </div>
 </section>
 
+<!-- 段间分割 -->
+<div class="section-divider">
+    <svg viewBox="0 0 1440 60" preserveAspectRatio="none"><path d="M0,30 C240,0 480,60 720,30 C960,0 1200,60 1440,30 L1440,60 L0,60 Z" fill="rgba(0,245,212,0.03)"/></svg>
+</div>
+
 <!-- ==================== 项目展示 ==================== -->
 <section class="section" id="projects">
+    <span class="section-number">03</span>
     <div class="section-container">
         <div class="section-header reveal">
             <span class="section-tag">Projects</span>
@@ -327,24 +610,26 @@
             <div class="project-card reveal rd1">
                 <div class="project-img i1">
                     <div class="img-pattern"></div>
+                    <div class="floating-orb"></div>
                     <i class="fa-solid fa-cloud-sun-rain"></i>
                 </div>
                 <div class="project-body">
                     <h3>气象管理数据库系统</h3>
                     <p>基于MySQL与C#开发的桌面端数据库管理系统。设计气象站、区域、气象记录三大核心表，严格遵循3NF范式规范。通过数据库触发器实现温度异常自动预警，确保数据一致性与业务规则完整性。</p>
-                    <div class="project-tags"><span class="tag">#数据库设计</span><span class="tag mg">#MySQL</span><span class="tag">#C#</span><span class="tag mg">#3NF</span></div>
+                    <div class="project-tags"><span class="tag">#数据库设计</span><span class="tag">#MySQL</span><span class="tag">#C#</span><span class="tag">#3NF</span></div>
                 </div>
             </div>
             <!-- 项目2: 非遗手工艺微信小程序 -->
             <div class="project-card reveal rd2">
                 <div class="project-img i2">
                     <div class="img-pattern"></div>
+                    <div class="floating-orb"></div>
                     <i class="fa-solid fa-palette"></i>
                 </div>
                 <div class="project-body">
                     <h3>非遗手工艺交流平台 · 微信小程序</h3>
                     <p>互联网+参赛作品，已获大创立项及软件著作权。基于uni-app + Vue 3 + Pinia + 微信云开发全栈构建，覆盖3D作品展示、商城、社区互动、实时聊天、商家管理八大功能模块。云数据库支撑用户系统与内容管理，云函数实现数据同步。</p>
-                    <div class="project-tags"><span class="tag">#微信小程序</span><span class="tag mg">#Vue3</span><span class="tag">#云开发</span><span class="tag mg">#uni-app</span></div>
+                    <div class="project-tags"><span class="tag">#微信小程序</span><span class="tag">#Vue3</span><span class="tag">#云开发</span><span class="tag">#uni-app</span></div>
                 </div>
             </div>
         </div>
@@ -353,6 +638,7 @@
 
 <!-- ==================== 联系我 ==================== -->
 <section class="section" id="contact">
+    <span class="section-number">04</span>
     <div class="section-container">
         <div class="section-header reveal">
             <span class="section-tag">Contact</span>
@@ -384,16 +670,51 @@
     <p>&copy; 2027 曹雨杭 · 信息管理与信息系统 · Built with <span class="heart">&#x2665;</span> and Code</p>
 </footer>
 
+<!-- 回到顶部 -->
+<button class="back-to-top" id="backToTop" aria-label="回到顶部">
+    <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
+
 <!-- ==================== CDN 脚本 ==================== -->
 <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
-<script src="https://cdn.jsdelivr.net/npm/vanilla-tilt@1.8.1/dist/vanilla-tilt.min.js"></script>
 
 <script>
 /* ================================================================
-   主脚本：整合所有交互与动效
+   主脚本 — 整合所有交互与动效
    ================================================================ */
 
-// ---------- 1. 鼠标跟随光晕 ----------
+// ---------- 0. 滚动进度条 + 回到顶部 ----------
+const scrollProgress = document.getElementById('scrollProgress');
+const backToTop = document.getElementById('backToTop');
+window.addEventListener('scroll', () => {
+    const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+    const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    const progress = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+    scrollProgress.style.width = progress + '%';
+    backToTop.classList.toggle('visible', scrollTop > 500);
+});
+backToTop.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+// ---------- 1. 背景漂浮粒子 ----------
+const bgParticles = document.getElementById('bgParticles');
+for (let i = 0; i < 25; i++) {
+    const dot = document.createElement('div');
+    dot.classList.add('bg-dot');
+    const size = 2 + Math.random() * 4;
+    dot.style.width = size + 'px';
+    dot.style.height = size + 'px';
+    dot.style.left = Math.random() * 100 + '%';
+    dot.style.animationDuration = 12 + Math.random() * 20 + 's';
+    dot.style.animationDelay = Math.random() * 15 + 's';
+    const hue = Math.random() < 0.5 ? '0,245,212' : '255,111,216';
+    dot.style.background = `rgba(${hue},0.5)`;
+    dot.style.boxShadow = `0 0 ${size*3}px rgba(${hue},0.4)`;
+    bgParticles.appendChild(dot);
+}
+
+// ---------- 2. 鼠标跟随光晕 ----------
 const mouseGlow = document.getElementById('mouseGlow');
 let glowTimer;
 document.addEventListener('mousemove', (e) => {
@@ -404,24 +725,21 @@ document.addEventListener('mousemove', (e) => {
     glowTimer = setTimeout(() => mouseGlow.classList.remove('visible'), 1500);
 });
 
-// ---------- 2. 导航栏滚动效果 & 汉堡菜单 ----------
+// ---------- 3. 导航栏 ----------
 const navbar = document.getElementById('navbar');
 const navToggle = document.getElementById('navToggle');
 const navMenu = document.getElementById('navMenu');
 const navLinks = document.querySelectorAll('.nav-link');
 
-// 滚动时导航栏加阴影
 window.addEventListener('scroll', () => {
     navbar.classList.toggle('scrolled', window.scrollY > 50);
 });
 
-// 汉堡菜单切换
 navToggle.addEventListener('click', () => {
     navToggle.classList.toggle('active');
     navMenu.classList.toggle('open');
 });
 
-// 点击导航链接关闭菜单 + 更新激活状态
 navLinks.forEach(link => {
     link.addEventListener('click', () => {
         navToggle.classList.remove('active');
@@ -431,7 +749,6 @@ navLinks.forEach(link => {
     });
 });
 
-// 滚动时自动高亮对应导航
 const sections = document.querySelectorAll('section[id]');
 window.addEventListener('scroll', () => {
     let current = '';
@@ -443,12 +760,11 @@ window.addEventListener('scroll', () => {
     });
 });
 
-// ---------- 3. Hero 粒子画布（数据流动画） ----------
+// ---------- 4. Hero 粒子画布（数据流动画） ----------
 const canvas = document.getElementById('particleCanvas');
 const ctx = canvas.getContext('2d');
 const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
-// 响应式缩放
 function resizeCanvas() {
     const rect = canvas.parentElement.getBoundingClientRect();
     const size = Math.min(rect.width, 500);
@@ -462,7 +778,6 @@ function resizeCanvas() {
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
 
-// 粒子系统
 const W = () => canvas.width / dpr;
 const H = () => canvas.height / dpr;
 const cx = () => W() / 2;
@@ -471,42 +786,46 @@ const cy = () => H() / 2;
 class Particle {
     constructor() {
         this.reset();
-        this.y = Math.random() * H(); // 初始分散
+        this.y = Math.random() * H();
     }
     reset() {
         this.angle = Math.random() * Math.PI * 2;
-        this.radius = 20 + Math.random() * (Math.min(W(), H()) * 0.35);
-        this.speed = 0.003 + Math.random() * 0.012;
-        this.size = 1 + Math.random() * 2.5;
-        this.opacity = 0.15 + Math.random() * 0.45;
+        this.radius = 25 + Math.random() * (Math.min(W(), H()) * 0.32);
+        this.speed = 0.002 + Math.random() * 0.01;
+        this.size = 1.2 + Math.random() * 3;
+        this.opacity = 0.12 + Math.random() * 0.5;
         this.x = cx() + Math.cos(this.angle) * this.radius;
         this.y = cy() + Math.sin(this.angle) * this.radius;
-        this.oscSpeed = 0.02 + Math.random() * 0.04;
-        this.oscAmp = 0.5 + Math.random() * 2;
+        this.oscSpeed = 0.015 + Math.random() * 0.04;
+        this.oscAmp = 0.5 + Math.random() * 2.5;
         this.oscOffset = Math.random() * Math.PI * 2;
-        this.hue = Math.random() < 0.5 ? '0,245,212' : '255,111,216';
+        this.hue = Math.random() < 0.45 ? '0,245,212' : '255,111,216';
+        this.twinkleSpeed = 0.02 + Math.random() * 0.06;
+        this.twinkleOffset = Math.random() * Math.PI * 2;
     }
     update(time) {
         this.angle += this.speed;
-        const r = this.radius + Math.sin(time * this.oscSpeed + this.oscOffset) * this.oscAmp * 8;
+        const r = this.radius + Math.sin(time * this.oscSpeed + this.oscOffset) * this.oscAmp * 10;
         this.x = cx() + Math.cos(this.angle) * r;
-        this.y = cy() + Math.sin(this.angle) * r * 0.7; // 椭圆
-        if (this.angle > Math.PI * 2) { this.angle -= Math.PI * 2; }
+        this.y = cy() + Math.sin(this.angle) * r * 0.65;
+        if (this.angle > Math.PI * 2) this.angle -= Math.PI * 2;
+        this.twinkle = (Math.sin(time * this.twinkleSpeed + this.twinkleOffset) + 1) / 2;
     }
     draw(ctx) {
+        const alpha = this.opacity * (0.5 + this.twinkle * 0.5);
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${this.hue},${this.opacity})`;
+        ctx.fillStyle = `rgba(${this.hue},${alpha})`;
         ctx.fill();
-        // 发光
+        // 辉光
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size * 2.5, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${this.hue},${this.opacity * 0.25})`;
+        ctx.arc(this.x, this.y, this.size * 3, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${this.hue},${alpha * 0.2})`;
         ctx.fill();
     }
 }
 
-const particles = Array.from({ length: 80 }, () => new Particle());
+const particles = Array.from({ length: 70 }, () => new Particle());
 let time = 0;
 
 function drawConnections(ctx, particles) {
@@ -515,28 +834,40 @@ function drawConnections(ctx, particles) {
             const dx = particles[i].x - particles[j].x;
             const dy = particles[i].y - particles[j].y;
             const dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < 90) {
-                const alpha = (1 - dist / 90) * 0.12;
+            if (dist < 100) {
+                const alpha = (1 - dist / 100) * 0.1;
                 ctx.beginPath();
                 ctx.moveTo(particles[i].x, particles[i].y);
                 ctx.lineTo(particles[j].x, particles[j].y);
                 ctx.strokeStyle = `rgba(0,245,212,${alpha})`;
-                ctx.lineWidth = 0.5;
+                ctx.lineWidth = 0.6;
                 ctx.stroke();
             }
         }
     }
 }
 
+function drawOrbitRings(ctx, time) {
+    for (let r = 60; r < Math.min(W(), H()) * 0.42; r += 55) {
+        ctx.beginPath();
+        ctx.ellipse(cx(), cy(), r, r * 0.55, 0, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(255,255,255,0.03)`;
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
+    }
+}
+
 function animateParticles() {
     ctx.clearRect(0, 0, W(), H());
-    // 中心柔和光晕
-    const grad = ctx.createRadialGradient(cx(), cy(), 0, cx(), cy(), Math.min(W(), H()) * 0.3);
-    grad.addColorStop(0, 'rgba(0,245,212,0.06)');
-    grad.addColorStop(0.5, 'rgba(255,111,216,0.03)');
+
+    const grad = ctx.createRadialGradient(cx(), cy(), 0, cx(), cy(), Math.min(W(), H()) * 0.35);
+    grad.addColorStop(0, 'rgba(0,245,212,0.05)');
+    grad.addColorStop(0.5, 'rgba(255,111,216,0.02)');
     grad.addColorStop(1, 'transparent');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, W(), H());
+
+    drawOrbitRings(ctx, time);
 
     particles.forEach(p => { p.update(time); p.draw(ctx); });
     drawConnections(ctx, particles);
@@ -545,7 +876,9 @@ function animateParticles() {
 }
 animateParticles();
 
-// ---------- 4. 技能雷达图 ----------
+// ---------- 5. 技能雷达图 ----------
+let radarAnimated = false;
+
 function drawRadarChart() {
     const radarCanvas = document.getElementById('radarCanvas');
     const rctx = radarCanvas.getContext('2d');
@@ -553,12 +886,11 @@ function drawRadarChart() {
     const center = size / 2;
     const maxR = size * 0.38;
 
-    // 9项技能: 覆盖数据库、后端、前端、小程序与项目管理
     const skills = ['MySQL', 'C#', 'Python', 'SQL', 'Vue.js', 'uni-app', '云开发', '数据库设计', '项目管理'];
     const values = [0.90, 0.80, 0.72, 0.85, 0.82, 0.80, 0.78, 0.88, 0.75];
     const n = skills.length;
 
-    // 更新图例
+    // 图例
     const legend = document.getElementById('skillsLegend');
     legend.innerHTML = skills.map((s, i) => `
         <div class="legend-item">
@@ -568,122 +900,184 @@ function drawRadarChart() {
         </div>
     `).join('');
 
-    // 绘制背景网格
-    const levels = 5;
-    for (let l = 1; l <= levels; l++) {
-        rctx.beginPath();
-        const r = maxR * l / levels;
+    function render(progress) {
+        rctx.clearRect(0, 0, size, size);
+
+        // 背景网格
+        const levels = 5;
+        for (let l = 1; l <= levels; l++) {
+            rctx.beginPath();
+            const r = maxR * l / levels;
+            for (let i = 0; i < n; i++) {
+                const angle = (Math.PI * 2 * i / n) - Math.PI / 2;
+                const x = center + Math.cos(angle) * r;
+                const y = center + Math.sin(angle) * r;
+                if (i === 0) rctx.moveTo(x, y);
+                else rctx.lineTo(x, y);
+            }
+            rctx.closePath();
+            rctx.strokeStyle = 'rgba(255,255,255,0.05)';
+            rctx.lineWidth = 0.8;
+            rctx.stroke();
+        }
+
+        // 轴线
         for (let i = 0; i < n; i++) {
             const angle = (Math.PI * 2 * i / n) - Math.PI / 2;
+            rctx.beginPath();
+            rctx.moveTo(center, center);
+            rctx.lineTo(center + Math.cos(angle) * maxR, center + Math.sin(angle) * maxR);
+            rctx.strokeStyle = 'rgba(255,255,255,0.06)';
+            rctx.lineWidth = 0.6;
+            rctx.stroke();
+        }
+
+        // 主数据区域（progress控制动画）
+        rctx.beginPath();
+        for (let i = 0; i < n; i++) {
+            const angle = (Math.PI * 2 * i / n) - Math.PI / 2;
+            const r = maxR * values[i] * progress;
             const x = center + Math.cos(angle) * r;
             const y = center + Math.sin(angle) * r;
             if (i === 0) rctx.moveTo(x, y);
             else rctx.lineTo(x, y);
         }
         rctx.closePath();
-        rctx.strokeStyle = 'rgba(255,255,255,0.06)';
-        rctx.lineWidth = 1;
-        rctx.stroke();
-    }
-
-    // 绘制轴线
-    for (let i = 0; i < n; i++) {
-        const angle = (Math.PI * 2 * i / n) - Math.PI / 2;
-        rctx.beginPath();
-        rctx.moveTo(center, center);
-        rctx.lineTo(center + Math.cos(angle) * maxR, center + Math.sin(angle) * maxR);
-        rctx.strokeStyle = 'rgba(255,255,255,0.08)';
-        rctx.lineWidth = 0.8;
-        rctx.stroke();
-    }
-
-    // 绘制数据区域
-    rctx.beginPath();
-    for (let i = 0; i < n; i++) {
-        const angle = (Math.PI * 2 * i / n) - Math.PI / 2;
-        const r = maxR * values[i];
-        const x = center + Math.cos(angle) * r;
-        const y = center + Math.sin(angle) * r;
-        if (i === 0) rctx.moveTo(x, y);
-        else rctx.lineTo(x, y);
-    }
-    rctx.closePath();
-    rctx.fillStyle = 'rgba(0,245,212,0.12)';
-    rctx.fill();
-    rctx.strokeStyle = 'rgba(0,245,212,0.6)';
-    rctx.lineWidth = 2;
-    rctx.shadowColor = 'rgba(0,245,212,0.5)';
-    rctx.shadowBlur = 16;
-    rctx.stroke();
-    rctx.shadowBlur = 0;
-
-    // 绘制第二个数据层（品红色调）
-    rctx.beginPath();
-    const values2 = values.map(v => v * 0.75 + 0.05);
-    for (let i = 0; i < n; i++) {
-        const angle = (Math.PI * 2 * i / n) - Math.PI / 2;
-        const r = maxR * values2[i];
-        const x = center + Math.cos(angle) * r;
-        const y = center + Math.sin(angle) * r;
-        if (i === 0) rctx.moveTo(x, y);
-        else rctx.lineTo(x, y);
-    }
-    rctx.closePath();
-    rctx.fillStyle = 'rgba(255,111,216,0.06)';
-    rctx.fill();
-    rctx.strokeStyle = 'rgba(255,111,216,0.35)';
-    rctx.lineWidth = 1.5;
-    rctx.shadowColor = 'rgba(255,111,216,0.3)';
-    rctx.shadowBlur = 10;
-    rctx.stroke();
-    rctx.shadowBlur = 0;
-
-    // 绘制数据点
-    for (let i = 0; i < n; i++) {
-        const angle = (Math.PI * 2 * i / n) - Math.PI / 2;
-        const r = maxR * values[i];
-        const x = center + Math.cos(angle) * r;
-        const y = center + Math.sin(angle) * r;
-        rctx.beginPath();
-        rctx.arc(x, y, 4, 0, Math.PI * 2);
-        rctx.fillStyle = '#00f5d4';
+        rctx.fillStyle = 'rgba(0,245,212,0.1)';
         rctx.fill();
-        rctx.beginPath();
-        rctx.arc(x, y, 8, 0, Math.PI * 2);
-        rctx.fillStyle = 'rgba(0,245,212,0.25)';
-        rctx.fill();
+        rctx.strokeStyle = 'rgba(0,245,212,0.55)';
+        rctx.lineWidth = 2;
+        rctx.shadowColor = 'rgba(0,245,212,0.5)';
+        rctx.shadowBlur = 18;
+        rctx.stroke();
+        rctx.shadowBlur = 0;
+
+        // 副数据层
+        if (progress > 0.3) {
+            const p2 = Math.min(1, (progress - 0.3) / 0.7);
+            rctx.beginPath();
+            for (let i = 0; i < n; i++) {
+                const angle = (Math.PI * 2 * i / n) - Math.PI / 2;
+                const r = maxR * (values[i] * 0.75 + 0.05) * p2;
+                const x = center + Math.cos(angle) * r;
+                const y = center + Math.sin(angle) * r;
+                if (i === 0) rctx.moveTo(x, y);
+                else rctx.lineTo(x, y);
+            }
+            rctx.closePath();
+            rctx.fillStyle = 'rgba(255,111,216,0.05)';
+            rctx.fill();
+            rctx.strokeStyle = 'rgba(255,111,216,0.3)';
+            rctx.lineWidth = 1.2;
+            rctx.shadowColor = 'rgba(255,111,216,0.3)';
+            rctx.shadowBlur = 10;
+            rctx.stroke();
+            rctx.shadowBlur = 0;
+        }
+
+        // 数据点
+        for (let i = 0; i < n; i++) {
+            const angle = (Math.PI * 2 * i / n) - Math.PI / 2;
+            const r = maxR * values[i] * progress;
+            const x = center + Math.cos(angle) * r;
+            const y = center + Math.sin(angle) * r;
+            if (r > 2) {
+                rctx.beginPath();
+                rctx.arc(x, y, 3.5, 0, Math.PI * 2);
+                rctx.fillStyle = '#00f5d4';
+                rctx.fill();
+                rctx.beginPath();
+                rctx.arc(x, y, 7, 0, Math.PI * 2);
+                rctx.fillStyle = 'rgba(0,245,212,0.2)';
+                rctx.fill();
+            }
+        }
+
+        // 标签
+        rctx.fillStyle = '#e0e0e0';
+        rctx.font = '13px "Noto Sans SC","Inter",sans-serif';
+        rctx.textAlign = 'center';
+        rctx.textBaseline = 'middle';
+        for (let i = 0; i < n; i++) {
+            const angle = (Math.PI * 2 * i / n) - Math.PI / 2;
+            const labelR = maxR + 26;
+            const x = center + Math.cos(angle) * labelR;
+            const y = center + Math.sin(angle) * labelR;
+            rctx.fillText(skills[i], x, y);
+        }
     }
 
-    // 标签
-    rctx.fillStyle = '#e0e0e0';
-    rctx.font = '13px "Noto Sans SC","Inter",sans-serif';
-    rctx.textAlign = 'center';
-    rctx.textBaseline = 'middle';
-    for (let i = 0; i < n; i++) {
-        const angle = (Math.PI * 2 * i / n) - Math.PI / 2;
-        const labelR = maxR + 26;
-        const x = center + Math.cos(angle) * labelR;
-        const y = center + Math.sin(angle) * labelR;
-        rctx.fillText(skills[i], x, y);
-    }
+    // 首次渲染静态
+    render(1);
+
+    // IntersectionObserver 触发动画
+    const skillsWrapper = document.getElementById('skillsWrapper');
+    const radarObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting && !radarAnimated) {
+                radarAnimated = true;
+                let p = 0;
+                const anim = () => {
+                    p += 0.03;
+                    if (p >= 1) { render(1); return; }
+                    // easeOutCubic
+                    const ep = 1 - Math.pow(1 - Math.min(p, 1), 3);
+                    render(ep);
+                    requestAnimationFrame(anim);
+                };
+                anim();
+                radarObserver.unobserve(skillsWrapper);
+            }
+        });
+    }, { threshold: 0.3 });
+    radarObserver.observe(skillsWrapper);
 }
 
 drawRadarChart();
 
-// ---------- 5. Vanilla Tilt 3D 倾斜 ----------
-if (typeof VanillaTilt !== 'undefined') {
-    VanillaTilt.init(document.getElementById('tiltCard'), {
-        max: 12,
-        speed: 600,
-        glare: true,
-        'max-glare': 0.15,
-        scale: 1.03,
-        perspective: 1000,
-        gyroscope: false
-    });
-}
 
-// ---------- 6. Typed.js 打字机效果 ----------
+// ---------- 6. 悬停提示词跟随（弹簧缓动） ----------
+(function(){
+    const card = document.getElementById('tiltCard');
+    const tip = document.getElementById('tiltTooltip');
+    if(!card||!tip)return;
+
+    const spring = { damping: 28, stiffness: 120, mass: 2 };
+    let cx = 0, cy = 0, tx = 0, ty = 0, vx = 0, vy = 0;
+    let op = 0, top = 0, vop = 0, animId = null;
+
+    function step(cur, tgt, vel, dt) {
+        const f = (tgt - cur) * spring.stiffness;
+        const d = -vel * spring.damping;
+        const nv = vel + (f + d) / spring.mass * dt;
+        const np = cur + nv * dt;
+        if (Math.abs(tgt - np) < 0.1 && Math.abs(nv) < 0.5) return { p: tgt, v: 0 };
+        return { p: np, v: nv };
+    }
+
+    function loop() {
+        const dt = 0.016;
+        const sx = step(cx, tx, vx, dt), sy = step(cy, ty, vy, dt), so = step(op, top, vop, dt);
+        cx = sx.p; vx = sx.v; cy = sy.p; vy = sy.v; op = so.p; vop = so.v;
+        tip.style.left = cx + 'px';
+        tip.style.top = cy + 'px';
+        tip.style.opacity = Math.min(1, Math.max(0, op));
+        const moving = Math.abs(tx - cx) > 0.1 || Math.abs(ty - cy) > 0.1 || Math.abs(top - op) > 0.01;
+        if (moving) animId = requestAnimationFrame(loop); else animId = null;
+    }
+
+    function start() { if (!animId) animId = requestAnimationFrame(loop); }
+
+    card.addEventListener('mousemove', e => {
+        const r = card.getBoundingClientRect();
+        tx = e.clientX - r.left; ty = e.clientY - r.top;
+        start();
+    });
+    card.addEventListener('mouseenter', () => { top = 1; tip.classList.add('visible'); start(); });
+    card.addEventListener('mouseleave', () => { top = 0; tip.classList.remove('visible'); start(); });
+})();
+
+// ---------- 7. Typed.js ----------
 if (typeof Typed !== 'undefined') {
     new Typed('#typed-target', {
         strings: ['首席数据官', '系统分析师', '全栈工程师', '产品经理'],
@@ -698,7 +1092,7 @@ if (typeof Typed !== 'undefined') {
     });
 }
 
-// ---------- 7. 滚动触发动画（Intersection Observer） ----------
+// ---------- 8. 滚动触发动画 ----------
 const revealEls = document.querySelectorAll('.reveal');
 const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
@@ -711,14 +1105,38 @@ const observer = new IntersectionObserver((entries) => {
 
 revealEls.forEach(el => observer.observe(el));
 
-// ---------- 8. 移动端触摸设备时隐藏光晕 ----------
+// ---------- 9. 数字递增动画 ----------
+const statNums = document.querySelectorAll('.stat-num[data-target]');
+const countObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            const el = entry.target;
+            const target = parseInt(el.getAttribute('data-target'));
+            const duration = 1500;
+            const start = performance.now();
+            function update(now) {
+                const elapsed = now - start;
+                const progress = Math.min(elapsed / duration, 1);
+                const eased = 1 - Math.pow(1 - progress, 3);
+                el.textContent = Math.round(target * eased);
+                if (progress < 1) requestAnimationFrame(update);
+            }
+            requestAnimationFrame(update);
+            countObserver.unobserve(el);
+        }
+    });
+}, { threshold: 0.5 });
+
+statNums.forEach(el => countObserver.observe(el));
+
+// ---------- 10. 移动端优化 ----------
 if ('ontouchstart' in window) {
     mouseGlow.style.display = 'none';
 }
 
-console.log('%c✨ 曹雨杭 · 信管个人主页已就绪 %c| %c暗夜星河 + 液态金属 + 数据流动画',
+console.log('%c✨ 曹雨杭 · 信管个人主页已就绪 %c| %c暗夜星河 + 液态金属 + 多重动效',
     'color:#00f5d4;font-size:16px;', '', 'color:#ff6fd8;');
-console.log('%c💡 试试移动鼠标、滚动页面、悬停卡片，感受交互细节。',
+console.log('%c💡 试试移动鼠标、滚动页面、悬停卡片，感受每一处精心打磨的细节。',
     'color:#9b9bb4;');
 </script>
 
